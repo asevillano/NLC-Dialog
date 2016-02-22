@@ -19,86 +19,10 @@
 		<a class="wordmark" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/" style="margin-top:45px;margin-left:40%;font-size:1.2rem;font-weight: 1.95312em;color:blue; font-family:Arial">
 			WATSON DIALOG
 		</a>
-		<!-- 
-		<nav class="heading-nav">
-		
-			<a class="heading-nav--item" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/services-catalog.html">
-				Services
-			</a>
-			<a class="heading-nav--item" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/">
-				Docs
-			</a>
-			<a class="heading-nav--item" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/gallery.html">
-				App Gallery
-			</a>
-			<a class="heading-nav--item" href="https://developer.ibm.com/watson/">
-				Community
-			</a>			
-		</nav>
-		 -->
 	</div>
 </header>
-
-<!-- 
-	<div class="_demo--banner">
-		<div class="_demo--container">
-			<div class="banner--service-info">
-				<h3 class="banner--service-title base--h2">
-					<img class="banner--service-icon_INLINE"
-						src="images/logo_ajuntament.png" alt="Ajuntament de L’Hospitalet">
-					Asistente del Ayuntamiento de Hospitalet
-				</h3>
--->				
-				<!-- 
-			<div class="banner--service-description">The Dialog service provides a comprehensive, technology platform for managing conversations between virtual agents and users through an Application Programming Interface (API).</div>
-			<div class="banner--service-resource">
-				<span class="icon icon-link"></span>
-				<strong>Resources:</strong>
-			</div>
-			<div class="banner--service-links">
-				<li class="base--li banner--service-link-item">
-					<a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/apis/dialog-apis.html" class="base--a">API Overview</a>
-				</li>
-				<li class="base--li banner--service-link-item">
-					<a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/dialog.html" class="base--a">Documentation</a>
-				</li>
-				<li class="base--li banner--service-link-item">
-					<a href="https://bluemix.net/deploy?repository=https://github.com/watson-developer-cloud/dialog-nodejs.git" class="base--a">Fork and Deploy on Bluemix</a>
-				</li>
-				<li class="base--li banner--service-link-item">
-					<a href="https://github.com/watson-developer-cloud/dialog-nodejs" class="base--a">Fork on Github</a>
-				</li>
-			</div>
-			-->
-<!-- 			
-			</div>
-		</div>
-	</div>
-	-->
-	
 	<div class="_demo--container">
 		<article class="_demo--content base--article">
-
-			<!--
-		<h2 class="base--h2">
-			Asistente del Ayuntamiento de Hospitalet
-		</h2>
-		
-		<p>A template that contains prepared structures to create natural dialogs for your app.</p>
-		<div class="radio-group">
-			<input type="radio" name="dialog-template" id="hello-radio" value="hello" class="base--radio" checked>
-			<label for="hello-radio" class="base--label radio-group--label">Order A Pizza Template</label>
-			<input type="radio" name="dialog-template" id="yellow-radio" value="yellow" class="base--radio" disabled>
-			<label for="yellow-radio" class="base--label radio-group--label">Tech Support Template</label>
-			<input type="radio" name="dialog-template" id="green-radio" value="green" class="base--radio" disabled>
-			<label for="green-radio" class="base--label radio-group--label">Movie Template</label>
-		</div>
-		-->
-
-			<!--  	<h2 class="base--h2">
-			Prueba del asistente
-		</h2>
-	-->
 			<div class="_content--dialog">
 				<div class="chat-window" style="background-color:white;margin-top:-40px;margin-left:5%;">
 					<div class="chat-box">
@@ -192,18 +116,12 @@
 			  <h2 class="base--h2">Descripción</h2>
 
 			  <div class="banner--service-description" style="color:white">
-				<b>Versión 02:</b> Esta versión trabaja con 2 clasificadores.</br> El
-				primero(genérico), para determinar que estamos hablando sobre
-				empadronamiento (classify=empadronamiento) y el segundo (específico)
-				para determinar sobre qué aspecto del empadronamiento se está
-				hablando.</br> Al clasificador específico se le llama cuando obtenemos
-				una respuesta del tipo: "Lo siento, no le he entendido, por
-				favor....", "Aún estoy en fase de aprendizaje....." o "Lo siento, no
-				le he entendido"; o cuando el grado de confianza en la respuesta es 0.</br>
+				<b>Versión 03:</b> Esta versión trabaja con 1 clasificador para determinar sobre qué aspecto
+				del empadronamiento se está hablando.</br> El clasificador es llamado cuando el grado de 
+				confianza en la respuesta es 0.</br>
 
 				<p>
 					<b>Ficheros desplegados:</b></br> 
-					- NLC inicial: Empadronamiento_v1_utf.csv</br> 
 					- NLC específico: 20160217_FAQ_padron_v165.csv</br> 
 					- Dialog:  20160217_dialog_v15.xml</br>
 				</p>
