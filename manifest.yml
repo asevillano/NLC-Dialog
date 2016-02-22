@@ -1,0 +1,17 @@
+declared-services:
+  dialog-service:
+    label: dialog
+    plan: standard
+  natural-language-classifier-service:
+    label: language-classifier
+    plan: standard
+applications:
+- services:
+  - dialog-service
+  - natural-language-classifier-service
+  name: dialog-nodejs
+  command: node app.js
+  path: .
+  memory: 512M
+  env:
+    NODE_ENV: production

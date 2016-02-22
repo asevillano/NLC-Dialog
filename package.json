@@ -1,0 +1,41 @@
+{
+  "name": "DialogNLCApp",
+  "version": "1.0.0",
+  "description": "A sample nodejs app for Bluemix that use the Dialog",
+  "engines": {
+    "node": ">=0.10.38"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexvillarin/Dialog-NLC.git"
+  },
+  "author": "IBM Corp.",
+  "contributors": [
+    {
+      "name": "James Zhang",
+      "email": "jzhang300@us.ibm.com"
+    },
+    {
+      "name": "Eva Xiaohui Luo",
+      "email": "evaluo_xhl@us.ibm.com"
+    },
+    {
+      "name": "German Attanasio Ruiz",
+      "email": "germanatt@us.ibm.com"
+    }
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/alexvillarin/Dialog-NLC/issues"
+  },
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "body-parser": "~1.14.1",
+    "errorhandler": "~1.4.1",
+    "express": "~4.13.3",
+    "request": "^2.67.0",
+    "watson-developer-cloud": "~1.0.6"
+  }
+}
