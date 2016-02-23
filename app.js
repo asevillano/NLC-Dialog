@@ -34,6 +34,7 @@ require('./config/express')(app);
 // if bluemix credentials exists, then override local
 var credentialsNLC = extend({
 	url : '<url>',
+	version: 'v1',
 	username: '<username>',
 	password: '<password>'
 }, bluemix.getServiceCreds('natural_language_classifier')); // VCAP_SERVICES
@@ -41,6 +42,7 @@ var credentialsNLC = extend({
 // if bluemix credentials exists, then override local
 var credentialsDialog =	extend({
 	url : '<url>',
+	version: 'v1',
 	username: '<username>',
 	password: '<password>'
 }, bluemix.getServiceCreds('dialog')); // VCAP_SERVICES
@@ -53,6 +55,7 @@ var dialog = watson.dialog(credentialsDialog);
 
 var credentialsCloudant = extend({
 	url : '<url>',
+	version: 'v1',
 	username: '<username>',
 	password: '<password>'
 }, bluemix.getServiceCreds('cloudantNoSQLDB'));
