@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-/*eslint-env node */
 'use strict';
 
 var express		= require('express'),
 	app			= express(),
 	bluemix		= require('./config/bluemix'),
 	extend		= require('util')._extend,
-	watson		= require('watson-developer-cloud');
+	watson		= require('watson-developer-cloud'),
+	multer		= require('multer'),
+	fs			= require('fs');
+	
+var Cloudant = require('cloudant');
+var username = process.env.cloudant_username || "05a2ef2a-c1c0-4241-9266-d4d8d1c92cee-bluemix";
+var password = process.env.cloudant_password || "07805190703e0982aadc094d58b089f9d77ecb209e8da5a7233ecfa868cbd563";
+var cloudant = Cloudant({account:username, password:password});
+
 
 // Bootstrap application settings
 require('./config/express')(app);
+
+//app.use(multer({ dest: './public/images/'}));
 
 // if bluemix credentials exists, then override local
 var credentialsNLC = extend({
@@ -52,22 +61,80 @@ var nlClassifier = watson.natural_language_classifier(credentialsNLC);
 // Create the service wrapper
 var dialog = watson.dialog(credentialsDialog);
 
-var dialog_id = process.env.DIALOG_ID || "8e6e51ac-3702-4515-86ff-90c48890ab5f";
-var classifier_id = process.env.CLASSIFIER_SPECIFIC_ID || "c7fa4ax22-nlc-1977"; // CLASSIFIER_ID especifico para saber la pregunta concreta a la que nos referimos
+var dialog_id = process.env.DIALOG_ID || "<dialog_id>";
+var classifier_id = process.env.CLASSIFIER_ID || "<classifier_id>";
+
+// Interface configuration
+var bannerColor = "white";
+var bannerDescription = "WATSON DIALOG";
+var avatarBackgroundColor = "white";
+var avatarBorderColor = "blue";
+var title = "Watson Dialog";
 
 // render index page
 app.get('/', function(req, res) {
 	res.render('index');
 });
 
-app.get('/setDialogID', function(req, res) {
-	dialog_id = req.query.newID;
-	res.send('Dialog ID updated');
+var upload = multer({ dest: 'public/images' });
+
+app.post('/config', upload.fields([{ name: 'backgroundImage', maxCount: 1 }, { name: 'bannerImage', maxCount: 1 }, { name: 'avatarImage', maxCount: 1 }, { name: 'tabImage', maxCount: 1 }]), function(req, res, next) {
+	if (req.files.backgroundImage)
+		fs.rename(req.files.backgroundImage[0].path.replace(/\\/g, '\/'), "public/images/background.jpg", function (err) {
+			if (err) throw err;
+			console.log('Background uploaded');
+		});
+	if (req.files.bannerImage)
+		fs.rename(req.files.bannerImage[0].path.replace(/\\/g, '\/'), "public/images/banner.png", function (err) {
+			if (err) throw err;
+			console.log('Banner uploaded');
+		});
+	if (req.files.avatarImage)
+		fs.rename(req.files.avatarImage[0].path.replace(/\\/g, '\/'), "public/images/avatar-watson.png", function (err) {
+			if (err) throw err;
+			console.log('Avatar uploaded');
+		});
+	if (req.files.tabImage)
+		fs.rename(req.files.tabImage[0].path.replace(/\\/g, '\/'), "public/images/favicon.ico", function (err) {
+			if (err) throw err;
+			console.log('Tab image uploaded');
+		});
+	if (req.body.dialogID != '')
+		dialog_id = req.body.dialogID;
+	if (req.body.classifierID != '')
+		classifier_id = req.body.classifierID;
+	
+	if (req.body.watsonBannerColor != '')
+		bannerColor = req.body.watsonBannerColor;
+	if (req.body.watsonBannerDescription != '')
+		bannerDescription = req.body.watsonBannerDescription;
+	if (req.body.watsonBackgroundColor != '')
+		avatarBackgroundColor = req.body.watsonBackgroundColor;
+	if (req.body.watsonBorderColor != '')
+		avatarBorderColor = req.body.watsonBorderColor;
+	if (req.body.tabName != '')
+		title = req.body.tabName;
+
+	cloudant.db.destroy('config', function(err) {
+		cloudant.db.create('config', function() {
+			var config = cloudant.db.use('config')
+
+			config.insert({ value: dialog_id }, 'dialog_id', function(err, body, header) {
+				if (err)
+					return console.log('[config.insert] ', err.message);
+			});
+			config.insert({ value: classifier_id }, 'classifier_id', function(err, body, header) {
+				if (err)
+					return console.log('[config.insert] ', err.message);
+			});
+		});
+	});
+	res.send('Updated');
 });
 
-app.get('/setClassifierID', function(req, res) {
-	classifier_id = req.query.newID;
-	res.send('Classifier ID updated');
+app.get('/getConfig', function(req, res) {
+	res.json({ bannerColor: bannerColor, bannerDescription: bannerDescription, avatarBackgroundColor: avatarBackgroundColor,
+			   avatarBorderColor: avatarBorderColor, title: title });
 });
 
 app.post('/conversation', function(req, res, next) {
@@ -89,7 +156,7 @@ app.post('/conversation', function(req, res, next) {
 					if (err)
 						return next(err);
 					res.json({ dialog_id: dialog_id, conversationOrigin: results, nlcParameter: paramsClassifier,
-							   nlc: resultsClassifier, conversationParameters: params, conversation: secondResults });	
+								 nlc: resultsClassifier, conversationParameters: params, conversation: secondResults });	
 				});
 			});
 		} else
@@ -107,9 +174,20 @@ app.post('/profile', function(req, res, next) {
 	});
 });
 
+function getIDs() {
+	var db = cloudant.db.use("ids");
+	db.get("dialog_id", function(err, data) {
+		dialog_id = data.value;
+	});
+	db.get("classifier_id", function(err, data) {
+		classifier_id = data.value;
+	});
+}
+
 // error-handler settings
 require('./config/error-handler')(app);
 
 var port = process.env.VCAP_APP_PORT || 3000;
 app.listen(port);
 console.log('listening at:', port);
+getIDs();

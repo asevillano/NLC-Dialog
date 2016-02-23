@@ -30,6 +30,10 @@ $(document).ready(function () {
 	 $('._content--dialog').css("width", 792);
 	 $('.chat-window').css("width",'920px');
   }
+  
+  if (location.hash != "#config") {
+	  $('.configTab').hide();
+  }
 	  
   var $chatInput = $('.chat-window--message-input'),
     $jsonPanel = $('#json-panel .base--textarea'),

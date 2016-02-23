@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Watson Dialog</title>
+<title id="title">Watson Dialog</title>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,16 +11,16 @@
 <body style="background-image:url(images/background.jpg)">
 
 	
-	<header class="_demo--heading" style="background-color:rgba(0,170,180,0.8);width:920px;margin-left:auto;margin-right:auto;border-radius:20px;padding-left:30px; background-color: white;">	
-	<div class="_demo--container" style="margin-top:7px">
-		<a class="wordmark" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/">
-			<img src="images/ibm-logo.png" class="chat-box--avatar-img">			
-		</a>
-		<a class="wordmark" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/" style="margin-top:45px;margin-left:40%;font-size:1.2rem;font-weight: 1.95312em;color:blue; font-family:Arial">
-			WATSON DIALOG
-		</a>
-	</div>
-</header>
+	<header id="banner" class="_demo--heading">	
+		<div class="_demo--container" style="margin-top:7px">
+			<a class="wordmark" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/">
+				<img src="images/banner.png" class="chat-box--avatar-img">			
+			</a>
+			<a id="bannerDescription" class="wordmark" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/" style="margin-top:45px;margin-left:40%;font-size:1.2rem;font-weight: 1.95312em;color:blue; font-family:Arial">
+				WATSON DIALOG
+			</a>
+		</div>
+	</header>
 	<div class="_demo--container">
 		<article class="_demo--content base--article">
 			<div class="_content--dialog">
@@ -30,8 +30,8 @@
 							<div
 								class="chat-box--item_WATSON chat-box--item chat-box--item_HIDDEN">
 								<div class="chat-box--container">
-									<div
-										class="img-container chat-box--avatar chat-box--avatar_WATSON" style="background-color:#ffffff; border: 2px solid blue;">
+									<div id="avatar"
+										class="img-container chat-box--avatar chat-box--avatar_WATSON">
 										<img src="images/avatar-watson.png"
 											style="width: 100%; height: 65px"
 											class="chat-box--avatar-img">
@@ -127,6 +127,42 @@
 				</p>
 			</div>
 			</div>
+			
+			<div class="configTab">
+				<form id="uploadForm" enctype="multipart/form-data" action="/config" method="post">
+				<div class="col-sm-2">
+				<h2 style="color:white; padding:40px 0px 0px 0px; margin-left: 5%; font-size: 1.95312em;">Visual Configuration</h2>
+				<div style="color:white; padding:40px 0px 0px 0px; margin-left: 5%">
+					<b>Background Image: </b> <input type="file" name="backgroundImage" margin-top="-10px"/>
+				</div>
+				<div style="color:white; padding:40px 0px 0px 0px; margin-left: 5%">
+					<b>Banner Logo: </b> <input type="file" name="bannerImage"/><br/>
+					<b>Banner Color: </b> <input type="text" name="watsonBannerColor" style="color:black"/><br/>
+					<b>Banner Description</b> <input type="text" name="watsonBannerDescription" style="color:black"/>
+				</div>
+				<div style="color:white; padding:40px 0px 0px 0px; margin-left: 5%">
+					<b>Avatar Watson Image: </b> <input type="file" name="avatarImage"/><br/>
+					<b>Avatar Watson Background Color: </b> <input type="text" name="watsonBackgroundColor" style="color:black"/><br/>
+					<b>Avatar Watson Border Color</b> <input type="text" name="watsonBorderColor" style="color:black"/>
+				</div>
+				<div style="color:white; padding:40px 0px 0px 0px; margin-left: 5%">
+					<b>Tab icon: </b> <input type="file" name="tabImage"/><br/>
+					<b>Tab Name: </b> <input type="text" name="tabName" style="color:black"/><br/>
+				</div>
+			  </div>
+			  <div class="col-sm-2">
+				<h2 style="color:white; padding:40px 0px 0px 0px; margin-left: 5%; font-size: 1.95312em;">IDs Configuration</h2>
+				<div style="color:white; padding:25px 0px 0px 0px; margin-left: 5%">
+					<b>Classifier ID: </b> <input type="text" name="classifierID" style="color:black"/><br/>
+					<b>Dialog ID: </b> <input type="text" name="dialogID" style="color:black"/><br/>
+				</div>
+			  </div>
+			  <div style="padding:40px 0px 0px 0px; margin-left: 16%">
+				<input id="update" type="button" value="Update" onclick="sendData()"><br/>
+				<input id="refresh" type="button" value="Refresh" onclick="location.reload();">
+			  </div>
+			  </form>
+			</div>
 			<!-- Property template -->
 			<div class="data--variable hidden">
 				<span class="data--variable-title"></span> <span
@@ -139,5 +175,46 @@
 	<script
 		src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script type="text/javascript" src="js/demo.js"></script>
+	<script>
+		function getConfig() {
+			var url = "/getConfig";
+			var http = new XMLHttpRequest();
+			http.open("GET", url, true);
+			  
+			http.onreadystatechange = function() {
+			    if (http.readyState == 4 && http.status == 200) {
+					var values = JSON.parse(http.response);
+					document.getElementById("banner").style = "width:920px;margin-left:auto;margin-right:auto;border-radius:20px;padding-left:30px; background-color: " + values.bannerColor + ";";
+					document.getElementById("bannerDescription").innerHTML = values.bannerDescription;
+					document.getElementById("avatar").style = "background-color:" + values.avatarBackgroundColor + "; border: 2px solid " + values.avatarBorderColor + ";";
+					document.getElementById("title").innerHTML = values.title;
+				}
+			}
+			http.send();
+		}
+		
+		function sendData() {
+		  var url = "/config";
+          var http = new XMLHttpRequest();
+          var params = new FormData(document.getElementById("uploadForm"));
+          http.open("POST", url, true);
+          document.getElementById('update').value = 'Updating...';
+          document.getElementById('update').disabled = true;
+          document.getElementById('refresh').disabled = true;
+		  
+          http.onreadystatechange = function() {
+               if (http.readyState == 4 && http.status == 200) {
+					getConfig();
+					alert(http.responseText);
+					document.getElementById('update').value = 'Update';
+					document.getElementById('update').disabled = false;
+					document.getElementById('refresh').disabled = false;
+				}
+		  }
+          http.send(params);
+		}
+		
+		getConfig();
+	</script>
 </body>
 </html>

@@ -9,9 +9,11 @@ applications:
 - services:
   - dialog-service
   - natural-language-classifier-service
-  name: dialog-nodejs
+  name: dialog-nlc-app
   command: node app.js
   path: .
-  memory: 512M
+  memory: 128M
   env:
     NODE_ENV: production
+    DIALOG_ID: 8e6e51ac-3702-4515-86ff-90c48890ab5f
+    CLASSIFIER_ID: c7fa4ax22-nlc-1977
