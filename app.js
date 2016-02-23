@@ -25,10 +25,6 @@ var express		= require('express'),
 	fs			= require('fs');
 	
 var Cloudant = require('cloudant');
-var username = process.env.cloudant_username || "05a2ef2a-c1c0-4241-9266-d4d8d1c92cee-bluemix";
-var password = process.env.cloudant_password || "07805190703e0982aadc094d58b089f9d77ecb209e8da5a7233ecfa868cbd563";
-var cloudant = Cloudant({account:username, password:password});
-
 
 // Bootstrap application settings
 require('./config/express')(app);
@@ -37,22 +33,16 @@ require('./config/express')(app);
 
 // if bluemix credentials exists, then override local
 var credentialsNLC = extend({
-	version: 'v1',
-	url : 'https://gateway.watsonplatform.net/natural-language-classifier/api',
-	username : 'abc2706e-43c4-440e-8e01-5428aeb43666',
-	password : 'QIFQWsr7PsMX'
-	// username: '<username>',
-	// password: '<password>'
+	url : '<url>',
+	username: '<username>',
+	password: '<password>'
 }, bluemix.getServiceCreds('natural_language_classifier')); // VCAP_SERVICES
 
 // if bluemix credentials exists, then override local
 var credentialsDialog =	extend({
-	url: 'https://gateway.watsonplatform.net/dialog/api',
-	username: 'c0820949-c9c3-4f4b-9932-26278ef3cad7',
-	password: '7DKt5aDAcnpx',
-	// username: '<username>',
-	// password: '<password>'
-	version: 'v1'
+	url : '<url>',
+	username: '<username>',
+	password: '<password>'
 }, bluemix.getServiceCreds('dialog')); // VCAP_SERVICES
 
 // Create the service wrapper
@@ -61,15 +51,31 @@ var nlClassifier = watson.natural_language_classifier(credentialsNLC);
 // Create the service wrapper
 var dialog = watson.dialog(credentialsDialog);
 
+var credentialsCloudant = extend({
+	url : '<url>',
+	username: '<username>',
+	password: '<password>'
+}, bluemix.getServiceCreds('cloudantNoSQLDB'));
+
+var cloudant = Cloudant({account:credentialsCloudant.username, password:credentialsCloudant.password});
+
 var dialog_id = process.env.DIALOG_ID || "<dialog_id>";
 var classifier_id = process.env.CLASSIFIER_ID || "<classifier_id>";
 
 // Interface configuration
-var bannerColor = "white";
-var bannerDescription = "WATSON DIALOG";
-var avatarBackgroundColor = "white";
-var avatarBorderColor = "blue";
-var title = "Watson Dialog";
+var interfaceConfig = { bannerColor : { value : 'white', name : "bannerColor" },
+						bannerURL : { value : 'http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud', name : "bannerURL" },
+						bannerDescription : { value : 'WATSON DIALOG', name : "bannerDescription" },
+						bannerDescriptionColor : { value : 'blue', name : "bannerDescriptionColor" },
+						bannerDescriptionURL : { value : 'http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud', name : "bannerDescriptionURL" },
+						avatarBackgroundColor : { value : "white", name : "avatarBackgroundColor" },
+						avatarBorderColor : { value : "blue", name : "avatarBorderColor" },
+						title : { value : "Watson Dialog", name : "title" } };
+						
+var interfaceImages = { backgroundImage : { value : "", path : "public/images/background.jpg" },
+						bannerImage : { value : "", path : "public/images/banner.png" },
+						avatarImage : { value : "", path : "public/images/avatar-watson.png" },
+						tabImage : { value : "", path : "public/images/favicon.ico" } };
 
 // render index page
 app.get('/', function(req, res) {
@@ -105,36 +111,36 @@ app.post('/config', upload.fields([{ name: 'backgroundImage', maxCount: 1 }, { n
 		classifier_id = req.body.classifierID;
 	
 	if (req.body.watsonBannerColor != '')
-		bannerColor = req.body.watsonBannerColor;
+		interfaceConfig.bannerColor.value = req.body.watsonBannerColor;
+	if (req.body.watsonBannerURL != '')
+		interfaceConfig.bannerURL.value = req.body.watsonBannerURL;
 	if (req.body.watsonBannerDescription != '')
-		bannerDescription = req.body.watsonBannerDescription;
+		interfaceConfig.bannerDescription.value = req.body.watsonBannerDescription;
+	if (req.body.watsonBannerDescriptionColor != '')
+		interfaceConfig.bannerDescriptionColor.value = req.body.watsonBannerDescriptionColor;
+	if (req.body.watsonBannerDescriptionURL != '')
+		interfaceConfig.bannerDescriptionURL.value = req.body.watsonBannerDescriptionURL;
 	if (req.body.watsonBackgroundColor != '')
-		avatarBackgroundColor = req.body.watsonBackgroundColor;
+		interfaceConfig.avatarBackgroundColor.value = req.body.watsonBackgroundColor;
 	if (req.body.watsonBorderColor != '')
-		avatarBorderColor = req.body.watsonBorderColor;
+		interfaceConfig.avatarBorderColor.value = req.body.watsonBorderColor;
 	if (req.body.tabName != '')
-		title = req.body.tabName;
+		interfaceConfig.title.value = req.body.tabName;
 
-	cloudant.db.destroy('config', function(err) {
-		cloudant.db.create('config', function() {
-			var config = cloudant.db.use('config')
-
-			config.insert({ value: dialog_id }, 'dialog_id', function(err, body, header) {
-				if (err)
-					return console.log('[config.insert] ', err.message);
-			});
-			config.insert({ value: classifier_id }, 'classifier_id', function(err, body, header) {
-				if (err)
-					return console.log('[config.insert] ', err.message);
-			});
-		});
-	});
+	storeIDs();
+	readImages();
+	storeConfig();
+	
 	res.send('Updated');
 });
 
 app.get('/getConfig', function(req, res) {
-	res.json({ bannerColor: bannerColor, bannerDescription: bannerDescription, avatarBackgroundColor: avatarBackgroundColor,
-			   avatarBorderColor: avatarBorderColor, title: title });
+	res.json({ bannerColor: interfaceConfig.bannerColor.value, bannerURL: interfaceConfig.bannerURL.value, 
+			   bannerDescription: interfaceConfig.bannerDescription.value,
+			   bannerDescriptionColor: interfaceConfig.bannerDescriptionColor.value,
+			   bannerDescriptionURL: interfaceConfig.bannerDescriptionURL.value,
+			   avatarBackgroundColor: interfaceConfig.avatarBackgroundColor.value,
+			   avatarBorderColor: interfaceConfig.avatarBorderColor.value, title: interfaceConfig.title.value });
 });
 
 app.post('/conversation', function(req, res, next) {
@@ -174,13 +180,129 @@ app.post('/profile', function(req, res, next) {
 	});
 });
 
+function storeIDs() {
+	cloudant.db.destroy('ids', function(err) {
+		cloudant.db.create('ids', function() {
+			var db = cloudant.db.use('ids')
+			if (dialog_id != "<dialog_id>")
+				db.insert({ value: dialog_id }, 'dialog_id', function(err, body, header) {
+					if (err)
+						return console.log('[ids.insert] ', err.message);
+				});
+			if (classifier_id != "<classifier_id>")
+				db.insert({ value: classifier_id }, 'classifier_id', function(err, body, header) {
+					if (err)
+						return console.log('[ids.insert] ', err.message);
+				});
+		});
+	});
+}
+
 function getIDs() {
 	var db = cloudant.db.use("ids");
 	db.get("dialog_id", function(err, data) {
-		dialog_id = data.value;
+		if (!err && dialog_id == "<dialog_id>")
+			dialog_id = data.value;
 	});
 	db.get("classifier_id", function(err, data) {
-		classifier_id = data.value;
+		if (!err && classifier_id == "<classifier_id>")
+			classifier_id = data.value;
+	});
+}
+
+function storeConfig() {
+	cloudant.db.destroy('config', function(err) {
+		cloudant.db.create('config', function() {
+			var db = cloudant.db.use('config');
+			db.insert({ value: interfaceConfig }, 'interfaceConfig', function(err, body, header) {
+				if (err)
+					return console.log('[config.insert] ', err.message);
+			});
+			db.insert({ value: interfaceImages.backgroundImage.value, type: "image/jpg" }, 'backgroundImage', function(err, body, header) {
+				if (err)
+					return console.log('[config.insert] ', err.message);
+			});
+			db.insert({ value: interfaceImages.bannerImage.value, type: "image/png" }, 'bannerImage', function(err, body, header) {
+				if (err)
+					return console.log('[config.insert] ', err.message);
+			});
+			db.insert({ value: interfaceImages.avatarImage.value, type: "image/png" }, 'avatarImage', function(err, body, header) {
+				if (err)
+					return console.log('[config.insert] ', err.message);
+			});
+			db.insert({ value: interfaceImages.tabImage.value, type: "image/x-icon" }, 'tabImage', function(err, body, header) {
+				if (err)
+					return console.log('[config.insert] ', err.message);
+			});
+		});
+	});
+}
+
+function getConfig() {
+	var db = cloudant.db.use("config");
+	db.get('interfaceConfig', function(err, data) {
+		if (!err)
+			interfaceConfig = data.value;
+	});
+	db.get('backgroundImage', function(err, data) {
+		if (!err) {
+			interfaceImages.backgroundImage.value = new Buffer(data.value.data);
+			fs.writeFile(interfaceImages.backgroundImage.path, interfaceImages.backgroundImage.value, function(err) {
+				if (err)
+					throw err;
+			});
+		}
+	});
+	db.get('bannerImage', function(err, data) {
+		if (!err) {
+			interfaceImages.bannerImage.value = new Buffer(data.value.data);
+			fs.writeFile(interfaceImages.bannerImage.path, interfaceImages.bannerImage.value, function(err) {
+				if (err)
+					throw err;
+			});
+		}
+	});
+	db.get('avatarImage', function(err, data) {
+		if (!err) {
+			interfaceImages.avatarImage.value = new Buffer(data.value.data);
+				fs.writeFile(interfaceImages.avatarImage.path, interfaceImages.avatarImage.value, function(err) {
+					if (err)
+						throw err;
+				});
+		}
+	});
+	db.get('tabImage', function(err, data) {
+		if (!err) {
+			interfaceImages.tabImage.value = new Buffer(data.value.data);
+			fs.writeFile(interfaceImages.tabImage.path, interfaceImages.tabImage.value, function(err) {
+				if (err)
+					throw err;
+			});
+		}
+	});
+}
+
+// Updates the value of the variable with the file
+function readImages() {
+	fs.readFile(interfaceImages.backgroundImage.path, function(err, data) {
+		if (err)
+			throw err;
+		interfaceImages.backgroundImage.value = data;
+	});
+	fs.readFile(interfaceImages.bannerImage.path, function(err, data) {
+		if (err)
+			throw err;
+		interfaceImages.bannerImage.value = data;
+	});
+	fs.readFile(interfaceImages.avatarImage.path, function(err, data) {
+		if (err)
+			throw err;
+		interfaceImages.avatarImage.value = data;
+	});
+	fs.readFile(interfaceImages.tabImage.path, function(err, data) {
+		if (err)
+			throw err;
+		interfaceImages.tabImage.value = data;
 	});
 }
 
@@ -190,4 +312,11 @@ require('./config/error-handler')(app);
 var port = process.env.VCAP_APP_PORT || 3000;
 app.listen(port);
 console.log('listening at:', port);
+
+// Enviroment variables override Cloudant
 getIDs();
+storeIDs();
+
+// Cloudant interface configuration overrides default
+readImages();
+getConfig();

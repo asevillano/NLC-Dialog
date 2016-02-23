@@ -13,10 +13,10 @@
 	
 	<header id="banner" class="_demo--heading">	
 		<div class="_demo--container" style="margin-top:7px">
-			<a class="wordmark" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/">
+			<a id="bannerURL" class="wordmark">
 				<img src="images/banner.png" class="chat-box--avatar-img">			
 			</a>
-			<a id="bannerDescription" class="wordmark" href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/" style="margin-top:45px;margin-left:40%;font-size:1.2rem;font-weight: 1.95312em;color:blue; font-family:Arial">
+			<a id="bannerDescription" class="wordmark">
 				WATSON DIALOG
 			</a>
 		</div>
@@ -138,7 +138,10 @@
 				<div style="color:white; padding:40px 0px 0px 0px; margin-left: 5%">
 					<b>Banner Logo: </b> <input type="file" name="bannerImage"/><br/>
 					<b>Banner Color: </b> <input type="text" name="watsonBannerColor" style="color:black"/><br/>
-					<b>Banner Description</b> <input type="text" name="watsonBannerDescription" style="color:black"/>
+					<b>Banner URL: </b> <input type="text" name="watsonBannerURL" style="color:black"/><br/>
+					<b>Banner Description</b> <input type="text" name="watsonBannerDescription" style="color:black"/><br/>
+					<b>Banner Description Color</b> <input type="text" name="watsonBannerDescriptionColor" style="color:black"/><br/>
+					<b>Banner Description URL</b> <input type="text" name="watsonBannerDescriptionURL" style="color:black"/>
 				</div>
 				<div style="color:white; padding:40px 0px 0px 0px; margin-left: 5%">
 					<b>Avatar Watson Image: </b> <input type="file" name="avatarImage"/><br/>
@@ -185,7 +188,10 @@
 			    if (http.readyState == 4 && http.status == 200) {
 					var values = JSON.parse(http.response);
 					document.getElementById("banner").style = "width:920px;margin-left:auto;margin-right:auto;border-radius:20px;padding-left:30px; background-color: " + values.bannerColor + ";";
+					document.getElementById("bannerURL").href = values.bannerURL;
 					document.getElementById("bannerDescription").innerHTML = values.bannerDescription;
+					document.getElementById("bannerDescription").style = "margin-top:45px;margin-left:40%;font-size:1.2rem;font-weight: 1.95312em; font-family:Arial; color:" + values.bannerDescriptionColor + ";";
+					document.getElementById("bannerDescription").href = values.bannerDescriptionURL;
 					document.getElementById("avatar").style = "background-color:" + values.avatarBackgroundColor + "; border: 2px solid " + values.avatarBorderColor + ";";
 					document.getElementById("title").innerHTML = values.title;
 				}
